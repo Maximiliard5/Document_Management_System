@@ -1,5 +1,6 @@
 package com.example.dms.user;
 
+import com.example.dms.exception.EmailAlreadyExistsException;
 import com.example.dms.security.JwtService;
 import com.example.dms.user.dto.AuthResponse;
 import com.example.dms.user.dto.LoginRequest;
@@ -31,7 +32,7 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Email already in use");
+            throw new EmailAlreadyExistsException(request.getEmail());
         }//if the email is already taken, throw exception
         //We build a new User object, hash the password with BCrypt, assign the default role of USER, and save it to the database. New registrations are always USER — admins are created separately.
         var user = new User();
