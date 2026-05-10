@@ -45,6 +45,17 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", null);
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNotFound(ResourceNotFoundException ex){
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null);
+    }
+
+    @ExceptionHandler(org.springframework.security.authorization.AuthorizationDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAuthorizationDenied(
+            org.springframework.security.authorization.AuthorizationDeniedException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, "Access denied", null);
+    }
+
     private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String message, Object details){
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now().toString());
