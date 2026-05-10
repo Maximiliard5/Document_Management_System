@@ -13,12 +13,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class JWTService {
+public class JwtService {
 
     private final String secretKey;
     private final long expiration;
 
-    public JWTService(
+    public JwtService(
             @Value("${jwt.secret}") String secretKey,
             @Value("${jwt.expiration}") long expiration) {
         this.secretKey = secretKey;
