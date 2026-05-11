@@ -1,0 +1,18 @@
+$kind: http-request
+name: Register - 201 Success
+url: http://localhost:8080/auth/register
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"firstName\": \"TestFirstName\",\r
+
+    \    \"lastName\": \"TestLastName\",\r
+
+    \    \"email\": \"test@test.com\",\r
+
+    \    \"password\": \"testpassword123\"\r
+
+    }"
+order: 1778498495226

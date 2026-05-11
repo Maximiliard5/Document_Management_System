@@ -1,0 +1,17 @@
+$kind: http-request
+url: http://localhost:8080/users/me
+method: GET
+body:
+  type: json
+  content: "{\r
+
+    \    \"firstName\": \"UpdatedFirstName\",\r
+
+    \    \"lastName\": \"UpdatedLastName\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiVVNFUiIsInN1YiI6InRlc3RAdGVzdC5jb20iLCJpYXQiOjE3Nzg0OTkzOTEsImV4cCI6MTc3ODU4NTc5MX0.Ppm3S3Gd-8nBF37kxZTVov5A5AIdPHjLCekqPWPopvBN8kDfmL9kKCDbbY-x_phWI-7LPcwuo366fb_5IsK9eQ
+order: 3933621604651791

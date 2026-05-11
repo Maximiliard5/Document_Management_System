@@ -1,0 +1,14 @@
+$kind: http-request
+name: Login - 200 OK
+url: http://localhost:8080/auth/login
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"email\": \"test@test.com\",\r
+
+    \    \"password\": \"testpassword123\"\r
+
+    }"
+order: 4160761315591235
