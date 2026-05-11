@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -50,7 +51,7 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null);
     }
 
-    @ExceptionHandler(org.springframework.security.authorization.AuthorizationDeniedException.class)
+    @ExceptionHandler(AuthorizationDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAuthorizationDenied(
             org.springframework.security.authorization.AuthorizationDeniedException ex) {
         return buildResponse(HttpStatus.FORBIDDEN, "Access denied", null);
