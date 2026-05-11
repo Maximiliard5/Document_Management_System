@@ -1,4 +1,4 @@
-package com.example.dms.dto;
+package com.example.dms.dto.project;
 
 import jakarta.validation.constraints.Size;
 import lombok.Getter;

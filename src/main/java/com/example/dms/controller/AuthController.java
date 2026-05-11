@@ -1,8 +1,8 @@
 package com.example.dms.controller;
 
-import com.example.dms.dto.AuthResponse;
-import com.example.dms.dto.LoginRequest;
-import com.example.dms.dto.RegisterRequest;
+import com.example.dms.dto.auth.AuthResponse;
+import com.example.dms.dto.auth.LoginRequest;
+import com.example.dms.dto.auth.RegisterRequest;
 import com.example.dms.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

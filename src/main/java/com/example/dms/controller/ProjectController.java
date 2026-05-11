@@ -1,8 +1,8 @@
 package com.example.dms.controller;
 
-import com.example.dms.dto.CreateProjectRequest;
-import com.example.dms.dto.ProjectResponse;
-import com.example.dms.dto.UpdateProjectRequest;
+import com.example.dms.dto.project.CreateProjectRequest;
+import com.example.dms.dto.project.ProjectResponse;
+import com.example.dms.dto.project.UpdateProjectRequest;
 import com.example.dms.service.ProjectService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

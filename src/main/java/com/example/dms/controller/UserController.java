@@ -1,7 +1,7 @@
 package com.example.dms.controller;
 
-import com.example.dms.dto.UpdateProfileRequest;
-import com.example.dms.dto.UserResponse;
+import com.example.dms.dto.user.UpdateProfileRequest;
+import com.example.dms.dto.user.UserResponse;
 import com.example.dms.entity.Role;
 import com.example.dms.service.UserService;
 import jakarta.validation.Valid;

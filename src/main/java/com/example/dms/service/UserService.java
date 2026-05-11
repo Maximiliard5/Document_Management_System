@@ -1,7 +1,7 @@
 package com.example.dms.service;
 
-import com.example.dms.dto.UpdateProfileRequest;
-import com.example.dms.dto.UserResponse;
+import com.example.dms.dto.user.UpdateProfileRequest;
+import com.example.dms.dto.user.UserResponse;
 import com.example.dms.entity.Role;
 import com.example.dms.entity.UserEntity;
 import com.example.dms.exception.ResourceNotFoundException;

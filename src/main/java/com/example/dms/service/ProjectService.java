@@ -1,10 +1,10 @@
 package com.example.dms.service;
 
-import com.example.dms.dto.CreateProjectRequest;
-import com.example.dms.dto.ProjectResponse;
-import com.example.dms.dto.UpdateProjectRequest;
-import com.example.dms.dto.UserResponse;
-import com.example.dms.entity.Project;
+import com.example.dms.dto.project.CreateProjectRequest;
+import com.example.dms.dto.project.ProjectResponse;
+import com.example.dms.dto.project.UpdateProjectRequest;
+import com.example.dms.dto.user.UserResponse;
+import com.example.dms.entity.ProjectEntity;
 import com.example.dms.entity.UserEntity;
 import com.example.dms.exception.ResourceNotFoundException;
 import com.example.dms.repository.ProjectRepository;
@@ -29,7 +29,7 @@ public class ProjectService {
     @Transactional
     public ProjectResponse createProject(CreateProjectRequest request, Authentication authentication) {
         UserEntity owner = getAuthenticatedUser(authentication);
-        Project project = new Project();
+        ProjectEntity project = new ProjectEntity();
         project.setName(request.getName());
         project.setDescription(request.getDescription());
         project.setOwner(owner);
@@ -49,7 +49,7 @@ public class ProjectService {
     @Transactional(readOnly = true)
     public ProjectResponse getProject(Long id, Authentication authentication) {
         UserEntity user = getAuthenticatedUser(authentication);
-        Project project = findActiveProject(id);
+        ProjectEntity project = findActiveProject(id);
         checkMemberOrOwner(project, user);
         return toResponse(project);
     }
@@ -57,7 +57,7 @@ public class ProjectService {
     @Transactional
     public ProjectResponse updateProject(Long id, UpdateProjectRequest request, Authentication authentication) {
         UserEntity user = getAuthenticatedUser(authentication);
-        Project project = findActiveProject(id);
+        ProjectEntity project = findActiveProject(id);
         checkOwner(project, user);
 
         if (request.getName() != null) project.setName(request.getName());
@@ -69,7 +69,7 @@ public class ProjectService {
     @Transactional
     public ProjectResponse addMember(Long projectId, Long userId, Authentication authentication) {
         UserEntity requester = getAuthenticatedUser(authentication);
-        Project project = findActiveProject(projectId);
+        ProjectEntity project = findActiveProject(projectId);
         checkOwner(project, requester);
 
         UserEntity newMember = findUserById(userId);
@@ -80,7 +80,7 @@ public class ProjectService {
     @Transactional
     public ProjectResponse removeMember(Long projectId, Long userId, Authentication authentication) {
         UserEntity requester = getAuthenticatedUser(authentication);
-        Project project = findActiveProject(projectId);
+        ProjectEntity project = findActiveProject(projectId);
         checkOwner(project, requester);
 
         UserEntity member = findUserById(userId);
@@ -91,7 +91,7 @@ public class ProjectService {
     @Transactional
     public void deleteProject(Long id, Authentication authentication) {
         UserEntity user = getAuthenticatedUser(authentication);
-        Project project = findActiveProject(id);
+        ProjectEntity project = findActiveProject(id);
         checkOwner(project, user);
         project.setDeleted(true);
         projectRepository.save(project);
@@ -110,20 +110,20 @@ public class ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
-    private Project findActiveProject(Long id) {
-        Project project = projectRepository.findById(id)
+    private ProjectEntity findActiveProject(Long id) {
+        ProjectEntity project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
         if (project.isDeleted()) throw new ResourceNotFoundException("Project not found");
         return project;
     }
 
-    private void checkOwner(Project project, UserEntity user) {
+    private void checkOwner(ProjectEntity project, UserEntity user) {
         if (!project.getOwner().getId().equals(user.getId())) {
             throw new AccessDeniedException("Only the project owner can perform this action");
         }
     }
 
-    private void checkMemberOrOwner(Project project, UserEntity user) {
+    private void checkMemberOrOwner(ProjectEntity project, UserEntity user) {
         boolean isOwner = project.getOwner().getId().equals(user.getId());
         boolean isMember = project.getMembers().stream()
                 .anyMatch(m -> m.getId().equals(user.getId()));
@@ -132,7 +132,7 @@ public class ProjectService {
         }
     }
 
-    private ProjectResponse toResponse(Project project) {
+    private ProjectResponse toResponse(ProjectEntity project) {
         UserResponse ownerResponse = UserResponse.toResponse(project.getOwner());
         Set<UserResponse> memberResponses = project.getMembers()
                 .stream()

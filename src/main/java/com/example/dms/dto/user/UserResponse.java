@@ -1,4 +1,4 @@
-package com.example.dms.dto;
+package com.example.dms.dto.user;
 
 import com.example.dms.entity.Role;
 import com.example.dms.entity.UserEntity;

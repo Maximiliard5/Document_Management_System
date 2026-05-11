@@ -1,8 +1,8 @@
 package com.example.dms.service;
 
-import com.example.dms.dto.AuthResponse;
-import com.example.dms.dto.LoginRequest;
-import com.example.dms.dto.RegisterRequest;
+import com.example.dms.dto.auth.AuthResponse;
+import com.example.dms.dto.auth.LoginRequest;
+import com.example.dms.dto.auth.RegisterRequest;
 import com.example.dms.entity.Role;
 import com.example.dms.entity.UserEntity;
 import com.example.dms.exception.EmailAlreadyExistsException;

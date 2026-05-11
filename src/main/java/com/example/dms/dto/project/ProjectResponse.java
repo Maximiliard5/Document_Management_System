@@ -1,5 +1,6 @@
-package com.example.dms.dto;
+package com.example.dms.dto.project;
 
+import com.example.dms.dto.user.UserResponse;
 import com.example.dms.entity.ProjectStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
