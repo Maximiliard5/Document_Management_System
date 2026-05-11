@@ -35,3 +35,6 @@ build/
 #CLAUDE
 CLAUDE.md
 PROJECT_MAP.md
+
+.postman/
+REFERENCE_DOCUMENT/
