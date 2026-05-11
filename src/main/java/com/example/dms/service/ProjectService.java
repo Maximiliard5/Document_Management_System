@@ -43,7 +43,7 @@ public class ProjectService {
                 .stream()
                 .filter(p -> !p.isDeleted())
                 .map(this::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional(readOnly = true)
