@@ -24,3 +24,9 @@ server:
 jwt:
   secret: ${JWT_SECRET:af3547ee111149fab438fd54398fe7f9d0e56b78c1a2d8b1050f2dd7a6b4a0da}
   expiration: 86400000
+
+minio:
+  url: http://localhost:9000
+  access-key: minioadmin
+  secret-key: minioadmin
+  bucket: dms-documents
