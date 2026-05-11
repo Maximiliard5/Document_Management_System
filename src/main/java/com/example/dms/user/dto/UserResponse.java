@@ -1,6 +1,7 @@
 package com.example.dms.user.dto;
 
 import com.example.dms.user.Role;
+import com.example.dms.user.User;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,4 +14,15 @@ public class UserResponse {
     private String lastName;
     private Role role;
     private boolean active;
+
+    public static UserResponse toResponse(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .role(user.getRole())
+                .active(user.isActive())
+                .build();
+    }
 }
