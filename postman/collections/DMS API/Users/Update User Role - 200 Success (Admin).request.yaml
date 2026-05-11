@@ -1,0 +1,11 @@
+$kind: http-request
+name: Update User Role - 200 Success (Admin)
+url: http://localhost:8080/users/2/role?role=ADMIN
+method: PUT
+queryParams:
+  role: ADMIN
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiQURNSU4iLCJzdWIiOiJ0ZXN0QHRlc3QuY29tIiwiaWF0IjoxNzc4NTAwMTU3LCJleHAiOjE3Nzg1ODY1NTd9.CsdDSPBXNYq7UzABTI8AdEegn86497qCjcybUPNYlZCTRPWuOHq8EhPNqT86DFYUVLfdGf-7syHYN8pIEygHmw
+order: 4414722049812151

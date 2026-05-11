@@ -1,0 +1,15 @@
+$kind: http-request
+url: http://localhost:8080/projects/1
+method: PUT
+body:
+  type: json
+  content: "{\r
+
+    \    \"name\": \"UpdatedTestProjectName\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiQURNSU4iLCJzdWIiOiJ0ZXN0QHRlc3QuY29tIiwiaWF0IjoxNzc4NTAwNzA3LCJleHAiOjE3Nzg1ODcxMDd9.r2Hn6TlHeMnn2Y49uGi8mWMDC8HJ8FKxtCFqFJ2floS77zJDsY1EAXh8HKZodwwIU30z3MVXlB46qD7yZhg08w
+order: 4410556095693596

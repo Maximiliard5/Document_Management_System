@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get All Users - 403 (Not Admin)
+url: http://localhost:8080/users
+method: GET
+order: 4374721879586786
