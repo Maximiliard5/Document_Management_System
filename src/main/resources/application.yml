@@ -1,18 +1,23 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/dmsdb
-    username: dmsuser
-    password: dmspassword
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
-    open-in-view: false #ask about this later
+        format_sql: false
+    open-in-view: false
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 52MB
 
   flyway:
     enabled: true
@@ -22,11 +27,11 @@ server:
   port: 8080
 
 jwt:
-  secret: ${JWT_SECRET:af3547ee111149fab438fd54398fe7f9d0e56b78c1a2d8b1050f2dd7a6b4a0da}
+  secret: ${JWT_SECRET}
   expiration: 86400000
 
 minio:
   url: http://localhost:9000
-  access-key: minioadmin
-  secret-key: minioadmin
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
   bucket: dms-documents

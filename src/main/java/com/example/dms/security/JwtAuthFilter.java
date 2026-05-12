@@ -1,9 +1,11 @@
 package com.example.dms.security;
 
+import com.example.dms.service.AuditService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,16 +17,20 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 // OncePerRequestFilter = guarantees this filter runs exactly once per request
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final AuditService auditService;
 
-    public JwtAuthFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+    public JwtAuthFilter(JwtService jwtService, UserDetailsService userDetailsService,
+                         AuditService auditService) {
         this.jwtService = jwtService; //to validate the token
         this.userDetailsService = userDetailsService; //to load the user from the database
+        this.auditService = auditService;
     }
 
     @Override
@@ -63,9 +69,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                } else if (!userDetails.isEnabled()) {
+                    auditService.log(email, "AUTH_DENIED_DEACTIVATED", "USER", null, null,
+                            "JWT rejected: account disabled");
                 }
             } catch (UsernameNotFoundException e) {
-                // user no longer exists in the database, proceed unauthenticated
+                log.debug("JWT references unknown user: {}", email);
             }
         }
 

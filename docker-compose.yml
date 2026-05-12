@@ -6,8 +6,8 @@ services:
     container_name: dms-postgres
     environment:
       POSTGRES_DB: dmsdb
-      POSTGRES_USER: dmsuser
-      POSTGRES_PASSWORD: dmspassword
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -17,8 +17,8 @@ services:
     image: minio/minio
     container_name: dms-minio
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
     ports:
       - "9000:9000"
       - "9001:9001"

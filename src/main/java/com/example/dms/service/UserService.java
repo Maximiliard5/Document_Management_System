@@ -6,6 +6,7 @@ import com.example.dms.dto.user.UpdateProfileRequest;
 import com.example.dms.dto.user.UserResponse;
 import com.example.dms.entity.Role;
 import com.example.dms.entity.UserEntity;
+import com.example.dms.exception.InvalidOperationException;
 import com.example.dms.exception.ResourceNotFoundException;
 import com.example.dms.repository.UserRepository;
 import org.springframework.security.core.Authentication;
@@ -30,8 +31,8 @@ public class UserService {
 
     public UserResponse updateMe(Authentication authentication, UpdateProfileRequest request) {
         var user = getUserFromAuthentication(authentication);
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
+        if (request.getFirstName() != null) user.setFirstName(request.getFirstName());
+        if (request.getLastName() != null) user.setLastName(request.getLastName());
         userRepository.save(user);
         return toResponse(user);
     }
@@ -48,6 +49,11 @@ public class UserService {
             detailsExpression = "#role.name()")
     public UserResponse updateRole(Long id, Role role) {
         var user = findUserById(id);
+        if (user.getRole() == Role.ADMIN && role != Role.ADMIN) {
+            if (userRepository.countByRoleAndActiveTrue(Role.ADMIN) <= 1) {
+                throw new InvalidOperationException("Cannot demote the last active admin.");
+            }
+        }
         user.setRole(role);
         userRepository.save(user);
         log.info("User role changed: userId={} newRole={}", id, role);
@@ -58,6 +64,11 @@ public class UserService {
             entityIdExpression = "#id.toString()")
     public UserResponse deactivateUser(Long id) {
         var user = findUserById(id);
+        if (user.getRole() == Role.ADMIN) {
+            if (userRepository.countByRoleAndActiveTrue(Role.ADMIN) <= 1) {
+                throw new InvalidOperationException("Cannot deactivate the last active admin.");
+            }
+        }
         user.setActive(false);
         userRepository.save(user);
         log.info("User deactivated: userId={} email={}", id, user.getEmail());

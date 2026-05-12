@@ -79,7 +79,8 @@ public class TaskService {
         UserEntity user = getAuthenticatedUser(authentication);
         ProjectEntity project = findActiveProject(projectId);
         checkMemberOrOwner(project, user);
-        TaskEntity task = findActiveTask(taskId);
+        TaskEntity task = taskRepository.findByIdAndProjectIdAndDeletedFalse(taskId, projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
         if (request.getTitle() != null) task.setTitle(request.getTitle());
         if (request.getDescription() != null) task.setDescription(request.getDescription());
@@ -103,7 +104,8 @@ public class TaskService {
         UserEntity user = getAuthenticatedUser(authentication);
         ProjectEntity project = findActiveProject(projectId);
         checkMemberOrOwner(project, user);
-        TaskEntity task = findActiveTask(taskId);
+        TaskEntity task = taskRepository.findByIdAndProjectIdAndDeletedFalse(taskId, projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
         task.setDeleted(true);
         taskRepository.save(task);
     }
@@ -120,13 +122,6 @@ public class TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
         if (project.isDeleted()) throw new ResourceNotFoundException("Project not found");
         return project;
-    }
-
-    private TaskEntity findActiveTask(Long id) {
-        TaskEntity task = taskRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
-        if (task.isDeleted()) throw new ResourceNotFoundException("Task not found");
-        return task;
     }
 
     private void checkMemberOrOwner(ProjectEntity project, UserEntity user) {

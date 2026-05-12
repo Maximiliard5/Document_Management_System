@@ -8,6 +8,7 @@ import com.example.dms.dto.project.UpdateProjectRequest;
 import com.example.dms.dto.user.UserResponse;
 import com.example.dms.entity.ProjectEntity;
 import com.example.dms.entity.UserEntity;
+import com.example.dms.exception.InvalidOperationException;
 import com.example.dms.exception.ResourceNotFoundException;
 import com.example.dms.repository.ProjectRepository;
 import com.example.dms.repository.UserRepository;
@@ -44,7 +45,6 @@ public class ProjectService {
         UserEntity user = getAuthenticatedUser(authentication);
         return projectRepository.findAllByUser(user)
                 .stream()
-                .filter(p -> !p.isDeleted())
                 .map(this::toResponse)
                 .toList();
     }
@@ -80,7 +80,12 @@ public class ProjectService {
         checkOwner(project, requester);
 
         UserEntity newMember = findUserById(userId);
-        project.getMembers().add(newMember);
+        if (project.getOwner().getId().equals(newMember.getId())) {
+            throw new InvalidOperationException("Owner is already implicitly a member of the project.");
+        }
+        if (!project.getMembers().add(newMember)) {
+            throw new InvalidOperationException("User is already a member of this project.");
+        }
         return toResponse(projectRepository.save(project));
     }
 
@@ -95,7 +100,9 @@ public class ProjectService {
         checkOwner(project, requester);
 
         UserEntity member = findUserById(userId);
-        project.getMembers().remove(member);
+        if (!project.getMembers().remove(member)) {
+            throw new ResourceNotFoundException("User is not a member of this project.");
+        }
         return toResponse(projectRepository.save(project));
     }
 

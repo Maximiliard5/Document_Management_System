@@ -1,5 +1,6 @@
 package com.example.dms.controller;
 
+import com.example.dms.dto.document.DocumentDownload;
 import com.example.dms.dto.document.DocumentResponse;
 import com.example.dms.service.DocumentService;
 import org.springframework.core.io.InputStreamResource;
@@ -11,7 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
 import java.util.List;
 
 @RestController
@@ -45,11 +45,12 @@ public class DocumentController {
             @PathVariable Long projectId,
             @PathVariable Long documentId,
             Authentication authentication) {
-        InputStream stream = documentService.downloadDocument(projectId, documentId, authentication);
+        DocumentDownload download = documentService.downloadDocument(projectId, documentId, authentication);
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"file\"")
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(new InputStreamResource(stream));
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + download.name() + "\"")
+                .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(download.size()))
+                .contentType(MediaType.parseMediaType(download.contentType()))
+                .body(new InputStreamResource(download.stream()));
     }
 
     @DeleteMapping("/{documentId}")

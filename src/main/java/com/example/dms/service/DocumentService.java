@@ -1,6 +1,7 @@
 package com.example.dms.service;
 
 import com.example.dms.annotation.Audited;
+import com.example.dms.dto.document.DocumentDownload;
 import com.example.dms.dto.document.DocumentResponse;
 import com.example.dms.entity.DocumentEntity;
 import com.example.dms.entity.ProjectEntity;
@@ -13,7 +14,11 @@ import com.example.dms.repository.DocumentRepository;
 import com.example.dms.repository.ProjectRepository;
 import com.example.dms.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import io.minio.*;
+import io.minio.GetObjectArgs;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -21,13 +26,33 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
 @Service
 public class DocumentService {
+
+    private static final long MAX_FILE_SIZE = 50L * 1024 * 1024; // 50 MB
+    private static final Set<String> ALLOWED_MIME_TYPES = Set.of(
+            "application/pdf",
+            "image/jpeg",
+            "image/png",
+            "image/gif",
+            "image/webp",
+            "text/plain",
+            "text/csv",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            "application/msword",
+            "application/vnd.ms-excel",
+            "application/vnd.ms-powerpoint"
+    );
+    private static final Tika TIKA = new Tika();
 
     private final DocumentRepository documentRepository;
     private final ProjectRepository projectRepository;
@@ -58,6 +83,23 @@ public class DocumentService {
         ProjectEntity project = findActiveProject(projectId);
         checkMemberOrOwner(project, owner);
 
+        if (file.isEmpty()) {
+            throw new InvalidDocumentException("File must not be empty.");
+        }
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new InvalidDocumentException("File exceeds the maximum allowed size of 50 MB.");
+        }
+
+        String detectedMime;
+        try (InputStream headerStream = file.getInputStream()) {
+            detectedMime = TIKA.detect(headerStream);
+        } catch (IOException e) {
+            throw new InvalidDocumentException("Could not read file content.");
+        }
+        if (!ALLOWED_MIME_TYPES.contains(detectedMime)) {
+            throw new InvalidDocumentException("File type '" + detectedMime + "' is not allowed.");
+        }
+
         String fileName = file.getOriginalFilename();
         if (fileName == null || fileName.isBlank()) {
             throw new InvalidDocumentException("File must have a valid name.");
@@ -67,15 +109,14 @@ public class DocumentService {
                     "A document named '" + fileName + "' already exists in this project");
         }
 
-        String minioKey = UUID.randomUUID() + "_" + fileName;
+        String minioKey = UUID.randomUUID().toString();
 
         try {
-            ensureBucketExists();
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(bucket)
                     .object(minioKey)
                     .stream(file.getInputStream(), file.getSize(), -1)
-                    .contentType(file.getContentType())
+                    .contentType(detectedMime)
                     .build());
         } catch (FileStorageException e) {
             throw e;
@@ -85,7 +126,7 @@ public class DocumentService {
 
         DocumentEntity document = new DocumentEntity();
         document.setName(fileName);
-        document.setType(file.getContentType());
+        document.setType(detectedMime);
         document.setSize(file.getSize());
         document.setMinioKey(minioKey);
         document.setProject(project);
@@ -112,20 +153,21 @@ public class DocumentService {
             entityIdExpression = "#documentId.toString()",
             projectIdExpression = "#projectId")
     @Transactional(readOnly = true)
-    public InputStream downloadDocument(Long projectId, Long documentId,
-                                        Authentication authentication) {
+    public DocumentDownload downloadDocument(Long projectId, Long documentId,
+                                             Authentication authentication) {
         UserEntity user = getAuthenticatedUser(authentication);
         ProjectEntity project = findActiveProject(projectId);
         checkMemberOrOwner(project, user);
 
-        DocumentEntity document = documentRepository.findById(documentId)
+        DocumentEntity document = documentRepository.findByIdAndProjectId(documentId, projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found"));
 
         try {
-            return minioClient.getObject(GetObjectArgs.builder()
+            InputStream stream = minioClient.getObject(GetObjectArgs.builder()
                     .bucket(bucket)
                     .object(document.getMinioKey())
                     .build());
+            return new DocumentDownload(stream, document.getName(), document.getType(), document.getSize());
         } catch (Exception e) {
             throw new FileStorageException("Failed to download file from MinIO: " + e.getMessage());
         }
@@ -140,7 +182,7 @@ public class DocumentService {
         ProjectEntity project = findActiveProject(projectId);
         checkMemberOrOwner(project, user);
 
-        DocumentEntity document = documentRepository.findById(documentId)
+        DocumentEntity document = documentRepository.findByIdAndProjectId(documentId, projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found"));
 
         try {
@@ -157,18 +199,6 @@ public class DocumentService {
     }
 
     // --- helpers ---
-
-    private void ensureBucketExists() {
-        try {
-            boolean exists = minioClient.bucketExists(
-                    BucketExistsArgs.builder().bucket(bucket).build());
-            if (!exists) {
-                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
-            }
-        } catch (Exception e) {
-            throw new FileStorageException("Failed to initialize storage bucket: " + e.getMessage());
-        }
-    }
 
     private UserEntity getAuthenticatedUser(Authentication authentication) {
         return userRepository.findByEmail(authentication.getName())

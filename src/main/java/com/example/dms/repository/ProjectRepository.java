@@ -10,11 +10,6 @@ import java.util.List;
 
 public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
 
-    List<ProjectEntity> findByOwner(UserEntity owner);
-
-    @Query("SELECT p FROM ProjectEntity p JOIN p.members m WHERE m = :user")
-    List<ProjectEntity> findByMember(@Param("user") UserEntity user);
-
-    @Query("SELECT p FROM ProjectEntity p WHERE p.owner = :user OR :user MEMBER OF p.members")
+    @Query("SELECT p FROM ProjectEntity p WHERE (p.owner = :user OR :user MEMBER OF p.members) AND p.deleted = false")
     List<ProjectEntity> findAllByUser(@Param("user") UserEntity user);
 }

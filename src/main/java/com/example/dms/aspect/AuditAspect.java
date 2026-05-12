@@ -42,18 +42,27 @@ public class AuditAspect {
             spelContext.setVariable(paramNames[i], args[i]);
         }
 
-        Object result = joinPoint.proceed();
-        spelContext.setVariable("result", result);
+        Object result = null;
+        String outcome = "SUCCESS";
 
         try {
-            String entityId  = evaluate(audited.entityIdExpression(), spelContext, String.class);
-            Long   projectId = evaluate(audited.projectIdExpression(), spelContext, Long.class);
-            String details   = evaluate(audited.detailsExpression(), spelContext, String.class);
+            result = joinPoint.proceed();
+        } catch (Throwable t) {
+            outcome = "FAILURE: " + t.getClass().getSimpleName();
+            throw t;
+        } finally {
+            spelContext.setVariable("result", result);
+            try {
+                String entityId  = evaluate(audited.entityIdExpression(), spelContext, String.class);
+                Long   projectId = evaluate(audited.projectIdExpression(), spelContext, Long.class);
+                String details   = evaluate(audited.detailsExpression(), spelContext, String.class);
+                String fullDetails = details != null ? details + " | " + outcome : outcome;
 
-            auditService.log(actor, audited.action(), audited.entityType(),
-                    entityId, projectId, details);
-        } catch (Exception e) {
-            log.error("Audit logging failed for action {}: {}", audited.action(), e.getMessage());
+                auditService.log(actor, audited.action(), audited.entityType(),
+                        entityId, projectId, fullDetails);
+            } catch (Exception e) {
+                log.error("Audit logging failed for action {}", audited.action(), e);
+            }
         }
 
         return result;
