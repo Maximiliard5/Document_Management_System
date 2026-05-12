@@ -20,17 +20,20 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final AuditService auditService;
 
     public AuthService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
-            AuthenticationManager authenticationManager
+            AuthenticationManager authenticationManager,
+            AuditService auditService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
+        this.auditService = auditService;
     }
 
     public AuthResponse register(RegisterRequest request) {
@@ -56,16 +59,25 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+        } catch (Exception e) {
+            auditService.log(request.getEmail(), "LOGIN_FAILURE", "USER", null, null,
+                    e.getClass().getSimpleName());
+            throw e;
+        }
 
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Authenticated user not found: " + request.getEmail()));
         var token = jwtService.generateToken(user.getEmail(), user.getRole().name());
+
+        auditService.log(user.getEmail(), "LOGIN_SUCCESS", "USER", user.getId().toString(), null, null);
+
         return AuthResponse.builder()
                 .token(token)
                 .email(user.getEmail())

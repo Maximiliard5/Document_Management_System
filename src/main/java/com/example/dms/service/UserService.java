@@ -1,5 +1,7 @@
 package com.example.dms.service;
 
+import com.example.dms.annotation.Audited;
+import lombok.extern.slf4j.Slf4j;
 import com.example.dms.dto.user.UpdateProfileRequest;
 import com.example.dms.dto.user.UserResponse;
 import com.example.dms.entity.Role;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class UserService {
 
@@ -40,17 +43,24 @@ public class UserService {
                 .toList();
     }
 
+    @Audited(action = "USER_ROLE_CHANGED", entityType = "USER",
+            entityIdExpression = "#id.toString()",
+            detailsExpression = "#role.name()")
     public UserResponse updateRole(Long id, Role role) {
         var user = findUserById(id);
         user.setRole(role);
         userRepository.save(user);
+        log.info("User role changed: userId={} newRole={}", id, role);
         return toResponse(user);
     }
 
+    @Audited(action = "USER_DEACTIVATED", entityType = "USER",
+            entityIdExpression = "#id.toString()")
     public UserResponse deactivateUser(Long id) {
         var user = findUserById(id);
         user.setActive(false);
         userRepository.save(user);
+        log.info("User deactivated: userId={} email={}", id, user.getEmail());
         return toResponse(user);
     }
 

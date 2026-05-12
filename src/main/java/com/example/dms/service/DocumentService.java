@@ -1,14 +1,18 @@
 package com.example.dms.service;
 
+import com.example.dms.annotation.Audited;
 import com.example.dms.dto.document.DocumentResponse;
 import com.example.dms.entity.DocumentEntity;
 import com.example.dms.entity.ProjectEntity;
 import com.example.dms.entity.UserEntity;
 import com.example.dms.exception.FileStorageException;
+import com.example.dms.exception.InvalidDocumentException;
+import com.example.dms.exception.ResourceAlreadyExistsException;
 import com.example.dms.exception.ResourceNotFoundException;
 import com.example.dms.repository.DocumentRepository;
 import com.example.dms.repository.ProjectRepository;
 import com.example.dms.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import io.minio.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
@@ -21,6 +25,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class DocumentService {
 
@@ -42,6 +47,10 @@ public class DocumentService {
         this.minioClient = minioClient;
     }
 
+    @Audited(action = "DOCUMENT_UPLOAD", entityType = "DOCUMENT",
+            entityIdExpression = "#result.id.toString()",
+            projectIdExpression = "#projectId",
+            detailsExpression = "#file.originalFilename")
     @Transactional
     public DocumentResponse uploadDocument(Long projectId, MultipartFile file,
                                            Authentication authentication) {
@@ -49,7 +58,16 @@ public class DocumentService {
         ProjectEntity project = findActiveProject(projectId);
         checkMemberOrOwner(project, owner);
 
-        String minioKey = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        String fileName = file.getOriginalFilename();
+        if (fileName == null || fileName.isBlank()) {
+            throw new InvalidDocumentException("File must have a valid name.");
+        }
+        if (documentRepository.existsByProjectIdAndName(projectId, fileName)) {
+            throw new ResourceAlreadyExistsException(
+                    "A document named '" + fileName + "' already exists in this project");
+        }
+
+        String minioKey = UUID.randomUUID() + "_" + fileName;
 
         try {
             ensureBucketExists();
@@ -66,14 +84,16 @@ public class DocumentService {
         }
 
         DocumentEntity document = new DocumentEntity();
-        document.setName(file.getOriginalFilename());
+        document.setName(fileName);
         document.setType(file.getContentType());
         document.setSize(file.getSize());
         document.setMinioKey(minioKey);
         document.setProject(project);
         document.setOwner(owner);
 
-        return toResponse(documentRepository.save(document));
+        DocumentResponse response = toResponse(documentRepository.save(document));
+        log.info("Document uploaded: id={} name='{}' projectId={} owner={}", response.getId(), response.getName(), projectId, owner.getEmail());
+        return response;
     }
 
     @Transactional(readOnly = true)
@@ -88,6 +108,9 @@ public class DocumentService {
                 .toList();
     }
 
+    @Audited(action = "DOCUMENT_DOWNLOAD", entityType = "DOCUMENT",
+            entityIdExpression = "#documentId.toString()",
+            projectIdExpression = "#projectId")
     @Transactional(readOnly = true)
     public InputStream downloadDocument(Long projectId, Long documentId,
                                         Authentication authentication) {
@@ -108,6 +131,9 @@ public class DocumentService {
         }
     }
 
+    @Audited(action = "DOCUMENT_DELETE", entityType = "DOCUMENT",
+            entityIdExpression = "#documentId.toString()",
+            projectIdExpression = "#projectId")
     @Transactional
     public void deleteDocument(Long projectId, Long documentId, Authentication authentication) {
         UserEntity user = getAuthenticatedUser(authentication);
@@ -127,6 +153,7 @@ public class DocumentService {
         }
 
         documentRepository.delete(document);
+        log.info("Document deleted: id={} projectId={} by={}", documentId, projectId, user.getEmail());
     }
 
     // --- helpers ---

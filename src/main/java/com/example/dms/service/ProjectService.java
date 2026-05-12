@@ -1,5 +1,7 @@
 package com.example.dms.service;
 
+import com.example.dms.annotation.Audited;
+import lombok.extern.slf4j.Slf4j;
 import com.example.dms.dto.project.CreateProjectRequest;
 import com.example.dms.dto.project.ProjectResponse;
 import com.example.dms.dto.project.UpdateProjectRequest;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class ProjectService {
@@ -66,6 +69,10 @@ public class ProjectService {
         return toResponse(projectRepository.save(project));
     }
 
+    @Audited(action = "PROJECT_MEMBER_ADDED", entityType = "PROJECT",
+            entityIdExpression = "#projectId.toString()",
+            projectIdExpression = "#projectId",
+            detailsExpression = "'userId=' + #userId")
     @Transactional
     public ProjectResponse addMember(Long projectId, Long userId, Authentication authentication) {
         UserEntity requester = getAuthenticatedUser(authentication);
@@ -77,6 +84,10 @@ public class ProjectService {
         return toResponse(projectRepository.save(project));
     }
 
+    @Audited(action = "PROJECT_MEMBER_REMOVED", entityType = "PROJECT",
+            entityIdExpression = "#projectId.toString()",
+            projectIdExpression = "#projectId",
+            detailsExpression = "'userId=' + #userId")
     @Transactional
     public ProjectResponse removeMember(Long projectId, Long userId, Authentication authentication) {
         UserEntity requester = getAuthenticatedUser(authentication);
@@ -88,6 +99,8 @@ public class ProjectService {
         return toResponse(projectRepository.save(project));
     }
 
+    @Audited(action = "PROJECT_DELETE", entityType = "PROJECT",
+            entityIdExpression = "#id.toString()")
     @Transactional
     public void deleteProject(Long id, Authentication authentication) {
         UserEntity user = getAuthenticatedUser(authentication);
@@ -95,6 +108,7 @@ public class ProjectService {
         checkOwner(project, user);
         project.setDeleted(true);
         projectRepository.save(project);
+        log.info("Project deleted: id={} by={}", id, user.getEmail());
     }
 
     // --- helpers ---

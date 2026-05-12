@@ -1,5 +1,6 @@
 package com.example.dms.service;
 
+import com.example.dms.annotation.Audited;
 import com.example.dms.dto.task.CreateTaskRequest;
 import com.example.dms.dto.task.TaskResponse;
 import com.example.dms.dto.task.UpdateTaskRequest;
@@ -94,6 +95,9 @@ public class TaskService {
         return toResponse(taskRepository.save(task));
     }
 
+    @Audited(action = "TASK_DELETE", entityType = "TASK",
+            entityIdExpression = "#taskId.toString()",
+            projectIdExpression = "#projectId")
     @Transactional
     public void deleteTask(Long projectId, Long taskId, Authentication authentication) {
         UserEntity user = getAuthenticatedUser(authentication);
