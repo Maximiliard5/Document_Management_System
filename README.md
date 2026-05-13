@@ -11,7 +11,7 @@ A REST API backend for managing projects, tasks, and documents, with JWT-based a
 | Language | Java 21 |
 | Framework | Spring Boot 4.0.6 |
 | Security | Spring Security + JWT (JJWT 0.12.6) |
-| Persistence | Spring Data JPA + Hibernate → PostgreSQL 16 |
+| Persistence | Spring Data JPA + Hibernate -> PostgreSQL 16 |
 | Migrations | Flyway (V1–V6) |
 | File Storage | MinIO (S3-compatible) |
 | Build | Maven |
