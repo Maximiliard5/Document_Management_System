@@ -1,0 +1,9 @@
+$kind: http-request
+name: Delete Task - 204 Success
+url: http://localhost:8080/projects/1/tasks/1
+method: DELETE
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 4503034286218920

@@ -1,0 +1,11 @@
+$kind: http-request
+name: Get Tasks - Filter By Priority
+url: http://localhost:8080/projects/1/tasks?priority=HIGH
+method: GET
+queryParams:
+  priority: HIGH
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 4497663851905610

@@ -1,0 +1,12 @@
+$kind: http-request
+name: Get Tasks - Filter By Status And Priority
+url: http://localhost:8080/projects/1/tasks?status=TODO&priority=HIGH
+method: GET
+queryParams:
+  status: TODO
+  priority: HIGH
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 4500349529329911

@@ -1,0 +1,18 @@
+$kind: http-request
+name: Upload Document - 201 Success
+url: http://localhost:8080/projects/1/documents
+method: POST
+body:
+  type: formdata
+  content:
+    - type: file
+      key: file
+      src:
+        - /C:/Users/Bogdan/Desktop/diagrama.png
+      description: ""
+      disabled: false
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 1778523846555

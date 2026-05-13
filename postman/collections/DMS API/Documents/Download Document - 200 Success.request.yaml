@@ -1,0 +1,9 @@
+$kind: http-request
+name: Download Document - 200 Success
+url: http://localhost:8080/projects/1/documents/1/download
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 3457420814648395

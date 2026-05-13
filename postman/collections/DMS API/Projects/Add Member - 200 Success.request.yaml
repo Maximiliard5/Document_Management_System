@@ -1,0 +1,9 @@
+$kind: http-request
+name: Add Member - 200 Success.
+url: http://localhost:8080/projects/1/members/2
+method: POST
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 4418210542152174

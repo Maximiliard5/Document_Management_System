@@ -1,0 +1,16 @@
+$kind: http-request
+name: Create Task - 400 Missing Title
+url: http://localhost:8080/projects/1/tasks
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"description\": \"TestTaskDescription\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 1937775861640306

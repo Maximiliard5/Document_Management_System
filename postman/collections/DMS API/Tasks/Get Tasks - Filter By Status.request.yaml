@@ -1,0 +1,11 @@
+$kind: http-request
+name: Get Tasks - Filter By Status
+url: http://localhost:8080/projects/1/tasks?status=TODO
+method: GET
+queryParams:
+  status: TODO
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 4493880876469218

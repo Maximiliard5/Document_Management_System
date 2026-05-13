@@ -1,0 +1,9 @@
+$kind: http-request
+name: Delete Document - 204 Success
+url: http://localhost:8080/projects/1/documents/1
+method: DELETE
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 3623433853643822

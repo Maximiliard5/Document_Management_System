@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get All Tasks - 200 Success
+url: http://localhost:8080/projects/1/tasks
+method: GET
+auth:
+  credentials:
+    token: "{{token}}"
+  type: bearer
+order: 4444745118980626

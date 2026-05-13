@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get Tasks After Delete - 200 Empty List
+url: http://localhost:8080/projects/1/tasks
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 4503130468993198

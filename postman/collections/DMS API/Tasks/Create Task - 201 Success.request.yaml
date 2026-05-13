@@ -1,0 +1,21 @@
+$kind: http-request
+url: http://localhost:8080/projects/1/tasks
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"title\": \"TestTaskTitle\",\r
+
+    \    \"description\": \"TestTaskDescription\",\r
+
+    \    \"priority\": \"HIGH\",\r
+
+    \    \"deadline\": \"2026-12-31\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiQURNSU4iLCJzdWIiOiJ0ZXN0QHRlc3QuY29tIiwiaWF0IjoxNzc4NTE3MTgxLCJleHAiOjE3Nzg2MDM1ODF9.T0AVZWhYx4o_En5nfbU92jHcEcLY3897drrjuLgoFRm22mSG0wivBSrkNQLfppOEarOyecqSOqL5BUjxODezuQ
+order: 1778517212613

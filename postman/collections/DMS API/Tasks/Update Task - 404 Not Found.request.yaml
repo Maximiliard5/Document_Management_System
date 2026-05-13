@@ -1,0 +1,12 @@
+$kind: http-request
+name: Update Task - 404 Not Found
+url: http://localhost:8080/projects/1/tasks/999
+method: PUT
+body:
+  type: json
+  content: "{\r\n    \"status\": \"DONE\"\r\n}"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 4502699258721581
