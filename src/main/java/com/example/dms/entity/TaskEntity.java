@@ -9,6 +9,11 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * JPA entity representing a task within a project. Tasks support soft deletion
+ * via the {@code deleted} flag. The assignee is optional and may be any user —
+ * not necessarily a member of the project.
+ */
 @Entity
 @Table(name = "tasks")
 @Getter

@@ -11,9 +11,17 @@ import com.example.dms.security.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Handles user registration and login. Produces JWT tokens on successful authentication
+ * and audits both successful and failed login attempts.
+ */
 @Service
+@RequiredArgsConstructor
+@Transactional
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -22,20 +30,13 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final AuditService auditService;
 
-    public AuthService(
-            UserRepository userRepository,
-            PasswordEncoder passwordEncoder,
-            JwtService jwtService,
-            AuthenticationManager authenticationManager,
-            AuditService auditService
-    ) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-        this.authenticationManager = authenticationManager;
-        this.auditService = auditService;
-    }
-
+    /**
+     * Registers a new user account and returns a JWT token.
+     *
+     * @param request the registration details (email, password, first and last name)
+     * @return an {@link AuthResponse} containing the JWT and basic user info
+     * @throws EmailAlreadyExistsException if the email is already registered
+     */
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyExistsException(request.getEmail());
@@ -58,6 +59,16 @@ public class AuthService {
                 .build();
     }
 
+    /**
+     * Authenticates a user and returns a JWT token. Both successful and failed
+     * attempts are recorded in the audit log. Login failure throws the original
+     * Spring Security exception so the global handler can return the correct HTTP status.
+     *
+     * @param request the login credentials (email and password)
+     * @return an {@link AuthResponse} containing the JWT and basic user info
+     * @throws org.springframework.security.authentication.BadCredentialsException if credentials are wrong
+     * @throws org.springframework.security.authentication.DisabledException if the account is deactivated
+     */
     public AuthResponse login(LoginRequest request) {
         try {
             authenticationManager.authenticate(

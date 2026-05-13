@@ -9,6 +9,10 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Spring configuration for MinIO. Provides the {@link io.minio.MinioClient} bean
+ * and ensures the storage bucket exists at application startup via an {@link org.springframework.boot.ApplicationRunner}.
+ */
 @Configuration
 public class MinioConfig {
 

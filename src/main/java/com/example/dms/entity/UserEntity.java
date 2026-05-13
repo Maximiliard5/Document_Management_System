@@ -11,6 +11,11 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * JPA entity representing a user account. The {@code active} flag is used for
+ * soft-disabling accounts — deactivated users are rejected by {@code JwtAuthFilter}
+ * on every request via Spring Security's {@code isEnabled()} check.
+ */
 @Entity
 @Table(name = "users")
 @Getter

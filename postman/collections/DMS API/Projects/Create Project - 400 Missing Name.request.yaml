@@ -1,4 +1,5 @@
 $kind: http-request
+name: Create Project - 400 Missing Name
 url: http://localhost:8080/projects
 method: POST
 body:
@@ -11,5 +12,5 @@ body:
 auth:
   type: bearer
   credentials:
-    token: eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiQURNSU4iLCJzdWIiOiJ0ZXN0QHRlc3QuY29tIiwiaWF0IjoxNzc4NTAwNDUxLCJleHAiOjE3Nzg1ODY4NTF9.qqFLovSEmDI8EZnWlxaa0Zmh1fjBB0SxyBbF8BO8bnAoWQcHeRDRGzQrhrm101H1Nm3IZ82HcXlMvQNx_2SVAw
+    token: "{{token}}"
 order: 3379420075049379

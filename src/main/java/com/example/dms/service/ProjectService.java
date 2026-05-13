@@ -1,7 +1,6 @@
 package com.example.dms.service;
 
 import com.example.dms.annotation.Audited;
-import lombok.extern.slf4j.Slf4j;
 import com.example.dms.dto.project.CreateProjectRequest;
 import com.example.dms.dto.project.ProjectResponse;
 import com.example.dms.dto.project.UpdateProjectRequest;
@@ -12,7 +11,7 @@ import com.example.dms.exception.InvalidOperationException;
 import com.example.dms.exception.ResourceNotFoundException;
 import com.example.dms.repository.ProjectRepository;
 import com.example.dms.repository.UserRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -22,14 +21,24 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Slf4j
+/**
+ * Manages the full lifecycle of projects: creation, retrieval, updates,
+ * member management, and soft deletion.
+ */
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
 
+    /**
+     * Creates a new project owned by the authenticated user.
+     *
+     * @param request        the project name and optional description
+     * @param authentication the current security context
+     * @return the created project as a {@link ProjectResponse}
+     */
     @Transactional
     public ProjectResponse createProject(CreateProjectRequest request, Authentication authentication) {
         UserEntity owner = getAuthenticatedUser(authentication);
@@ -40,6 +49,12 @@ public class ProjectService {
         return toResponse(projectRepository.save(project));
     }
 
+    /**
+     * Returns all active projects that the authenticated user owns or is a member of.
+     *
+     * @param authentication the current security context
+     * @return list of visible projects as {@link ProjectResponse} objects
+     */
     @Transactional(readOnly = true)
     public List<ProjectResponse> getMyProjects(Authentication authentication) {
         UserEntity user = getAuthenticatedUser(authentication);
@@ -49,6 +64,15 @@ public class ProjectService {
                 .toList();
     }
 
+    /**
+     * Returns a single project. The caller must be the owner or a member.
+     *
+     * @param id             the project ID
+     * @param authentication the current security context
+     * @return the project as a {@link ProjectResponse}
+     * @throws ResourceNotFoundException if the project does not exist or is deleted
+     * @throws AccessDeniedException     if the caller is not a member or owner
+     */
     @Transactional(readOnly = true)
     public ProjectResponse getProject(Long id, Authentication authentication) {
         UserEntity user = getAuthenticatedUser(authentication);
@@ -57,6 +81,17 @@ public class ProjectService {
         return toResponse(project);
     }
 
+    /**
+     * Updates a project's name and/or description. Only the project owner can call this.
+     * Null fields in the request are left unchanged.
+     *
+     * @param id             the project ID
+     * @param request        the fields to update; null fields are skipped
+     * @param authentication the current security context
+     * @return the updated project as a {@link ProjectResponse}
+     * @throws ResourceNotFoundException if the project does not exist or is deleted
+     * @throws AccessDeniedException     if the caller is not the project owner
+     */
     @Transactional
     public ProjectResponse updateProject(Long id, UpdateProjectRequest request, Authentication authentication) {
         UserEntity user = getAuthenticatedUser(authentication);
@@ -69,6 +104,19 @@ public class ProjectService {
         return toResponse(projectRepository.save(project));
     }
 
+    /**
+     * Adds a user as a member of a project. Only the project owner can add members.
+     * The owner cannot be added again (they are implicitly a member), and duplicate
+     * members are rejected.
+     *
+     * @param projectId      the project to add the member to
+     * @param userId         the ID of the user to add
+     * @param authentication the current security context
+     * @return the updated project as a {@link ProjectResponse}
+     * @throws ResourceNotFoundException if the project or user does not exist
+     * @throws AccessDeniedException     if the caller is not the project owner
+     * @throws InvalidOperationException if the user is already a member or is the owner
+     */
     @Audited(action = "PROJECT_MEMBER_ADDED", entityType = "PROJECT",
             entityIdExpression = "#projectId.toString()",
             projectIdExpression = "#projectId",
@@ -89,6 +137,16 @@ public class ProjectService {
         return toResponse(projectRepository.save(project));
     }
 
+    /**
+     * Removes a member from a project. Only the project owner can remove members.
+     *
+     * @param projectId      the project to remove the member from
+     * @param userId         the ID of the user to remove
+     * @param authentication the current security context
+     * @return the updated project as a {@link ProjectResponse}
+     * @throws ResourceNotFoundException if the project does not exist or the user was not a member
+     * @throws AccessDeniedException     if the caller is not the project owner
+     */
     @Audited(action = "PROJECT_MEMBER_REMOVED", entityType = "PROJECT",
             entityIdExpression = "#projectId.toString()",
             projectIdExpression = "#projectId",
@@ -106,6 +164,15 @@ public class ProjectService {
         return toResponse(projectRepository.save(project));
     }
 
+    /**
+     * Soft-deletes a project by setting its {@code deleted} flag to {@code true}.
+     * Only the project owner can delete a project.
+     *
+     * @param id             the project ID
+     * @param authentication the current security context
+     * @throws ResourceNotFoundException if the project does not exist or is already deleted
+     * @throws AccessDeniedException     if the caller is not the project owner
+     */
     @Audited(action = "PROJECT_DELETE", entityType = "PROJECT",
             entityIdExpression = "#id.toString()")
     @Transactional
@@ -115,7 +182,6 @@ public class ProjectService {
         checkOwner(project, user);
         project.setDeleted(true);
         projectRepository.save(project);
-        log.info("Project deleted: id={} by={}", id, user.getEmail());
     }
 
     // --- helpers ---

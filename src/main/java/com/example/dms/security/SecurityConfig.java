@@ -14,6 +14,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Spring Security configuration. Sets up a stateless JWT-based security policy:
+ * CSRF is disabled (not needed for token-based APIs), sessions are never created,
+ * and all requests except {@code /auth/**} require a valid token.
+ */
 @Configuration //tells spring this class contains bean definitions
 @EnableWebSecurity //activates spring Security for the whole application
 @EnableMethodSecurity //allows me to use @PreAuthorize("hasRole('ADMIN')") directly on controller methods later

@@ -9,6 +9,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Spring Security {@link UserDetailsService} implementation. Loads a user by email
+ * from the database and converts it into a Spring Security {@code UserDetails} object,
+ * including the user's role as a {@code GrantedAuthority} and the {@code active} flag
+ * as the enabled state.
+ */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 

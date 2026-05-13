@@ -15,6 +15,10 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Centralized exception handler for all controllers. Maps each custom exception to the
+ * appropriate HTTP status code and a consistent JSON error response body.
+ */
 @Slf4j
 @RestControllerAdvice //Marks this class as a global exception handler. Spring watches every controller and when an exception is thrown, it checks here first for a matching @ExceptionHandler method.
 public class GlobalExceptionHandler {

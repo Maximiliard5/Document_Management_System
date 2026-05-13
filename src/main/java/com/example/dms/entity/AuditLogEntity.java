@@ -7,6 +7,10 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * JPA entity representing a single audit log entry. The {@code project_id} column
+ * has no foreign key constraint intentionally — audit rows must survive project deletion.
+ */
 @Getter
 @Setter
 @Entity

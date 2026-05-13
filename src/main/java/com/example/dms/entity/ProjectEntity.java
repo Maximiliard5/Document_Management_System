@@ -10,6 +10,12 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * JPA entity representing a project. Projects support soft deletion via the
+ * {@code deleted} flag — deleted projects are hidden from all queries but remain
+ * in the database. The {@code members} collection holds users added explicitly;
+ * the owner is tracked separately and is not in this collection.
+ */
 @Entity
 @Table(name = "projects")
 @Getter

@@ -13,6 +13,7 @@ import com.example.dms.exception.ResourceNotFoundException;
 import com.example.dms.repository.DocumentRepository;
 import com.example.dms.repository.ProjectRepository;
 import com.example.dms.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
@@ -32,8 +33,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Manages document upload, listing, download, and deletion. Document metadata
+ * (name, type, size) is stored in PostgreSQL; the actual file content is stored
+ * in MinIO. Documents are hard-deleted — removing a document clears both the
+ * database row and the MinIO object immediately.
+ */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class DocumentService {
 
     private static final long MAX_FILE_SIZE = 50L * 1024 * 1024; // 50 MB
@@ -62,16 +70,21 @@ public class DocumentService {
     @Value("${minio.bucket}")
     private String bucket;
 
-    public DocumentService(DocumentRepository documentRepository,
-                           ProjectRepository projectRepository,
-                           UserRepository userRepository,
-                           MinioClient minioClient) {
-        this.documentRepository = documentRepository;
-        this.projectRepository = projectRepository;
-        this.userRepository = userRepository;
-        this.minioClient = minioClient;
-    }
-
+    /**
+     * Validates and uploads a file to the project. MIME type is detected via Apache Tika
+     * (not the client-supplied Content-Type). The MinIO object key is a UUID — the original
+     * filename is stored only in the database as display metadata.
+     *
+     * @param projectId      the project to attach the document to
+     * @param file           the multipart file to upload (max 50 MB, allow-listed MIME types)
+     * @param authentication the current security context
+     * @return metadata of the saved document as a {@link DocumentResponse}
+     * @throws ResourceNotFoundException     if the project does not exist or is deleted
+     * @throws AccessDeniedException         if the caller is not a member or owner
+     * @throws InvalidDocumentException      if the file is empty, too large, has a disallowed type, or has no name
+     * @throws ResourceAlreadyExistsException if a document with the same name already exists in the project
+     * @throws FileStorageException          if the MinIO upload fails
+     */
     @Audited(action = "DOCUMENT_UPLOAD", entityType = "DOCUMENT",
             entityIdExpression = "#result.id.toString()",
             projectIdExpression = "#projectId",
@@ -137,6 +150,15 @@ public class DocumentService {
         return response;
     }
 
+    /**
+     * Returns all document metadata for a project. Does not fetch file content from MinIO.
+     *
+     * @param projectId      the project to list documents for
+     * @param authentication the current security context
+     * @return list of document metadata as {@link DocumentResponse} objects
+     * @throws ResourceNotFoundException if the project does not exist or is deleted
+     * @throws AccessDeniedException     if the caller is not a member or owner
+     */
     @Transactional(readOnly = true)
     public List<DocumentResponse> listDocuments(Long projectId, Authentication authentication) {
         UserEntity user = getAuthenticatedUser(authentication);
@@ -149,6 +171,19 @@ public class DocumentService {
                 .toList();
     }
 
+    /**
+     * Retrieves a document's file stream from MinIO together with its metadata.
+     * The caller receives a {@link DocumentDownload} record containing the stream,
+     * original filename, content type, and size for building the HTTP response.
+     *
+     * @param projectId      the project the document belongs to
+     * @param documentId     the document to download
+     * @param authentication the current security context
+     * @return a {@link DocumentDownload} record with the file stream and metadata
+     * @throws ResourceNotFoundException if the project or document does not exist
+     * @throws AccessDeniedException     if the caller is not a member or owner
+     * @throws FileStorageException      if the MinIO retrieval fails
+     */
     @Audited(action = "DOCUMENT_DOWNLOAD", entityType = "DOCUMENT",
             entityIdExpression = "#documentId.toString()",
             projectIdExpression = "#projectId")
@@ -173,6 +208,18 @@ public class DocumentService {
         }
     }
 
+    /**
+     * Hard-deletes a document: removes the file from MinIO and the row from the database.
+     * This is intentional — hard delete immediately frees storage. Unlike projects and tasks,
+     * documents are never soft-deleted.
+     *
+     * @param projectId      the project the document belongs to
+     * @param documentId     the document to delete
+     * @param authentication the current security context
+     * @throws ResourceNotFoundException if the project or document does not exist
+     * @throws AccessDeniedException     if the caller is not a member or owner
+     * @throws FileStorageException      if the MinIO deletion fails
+     */
     @Audited(action = "DOCUMENT_DELETE", entityType = "DOCUMENT",
             entityIdExpression = "#documentId.toString()",
             projectIdExpression = "#projectId")

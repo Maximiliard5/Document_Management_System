@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Endpoints for user profile management and admin-level account operations.
+ * Admin-only endpoints are protected with {@code @PreAuthorize("hasRole('ADMIN')")}.
+ */
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -22,11 +26,13 @@ public class UserController {
         this.userService = userService;
     }
 
+    /** GET /users/me — returns the authenticated user's own profile. */
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getMe(Authentication authentication) {
         return ResponseEntity.ok(userService.getMe(authentication));
     }
 
+    /** PUT /users/me — updates the authenticated user's first and/or last name. */
     @PutMapping("/me")
     public ResponseEntity<UserResponse> updateMe(
             Authentication authentication,
@@ -34,12 +40,14 @@ public class UserController {
         return ResponseEntity.ok(userService.updateMe(authentication, request));
     }
 
+    /** GET /users — returns all users. Admin only. */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
+    /** PUT /users/{id}/role?role={ADMIN|USER} — changes a user's role. Admin only. */
     @PutMapping("/{id}/role")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> updateRole(
@@ -48,6 +56,7 @@ public class UserController {
         return ResponseEntity.ok(userService.updateRole(id, role));
     }
 
+    /** PUT /users/{id}/deactivate — deactivates a user account. Admin only. */
     @PutMapping("/{id}/deactivate")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> deactivateUser(@PathVariable Long id) {

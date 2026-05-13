@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Endpoints for task management within a project. All operations require
+ * the caller to be a member or owner of the specified project.
+ */
 @RestController
 @RequestMapping("/projects/{projectId}/tasks")
 public class TaskController {
@@ -24,6 +28,7 @@ public class TaskController {
         this.taskService = taskService;
     }
 
+    /** POST /projects/{projectId}/tasks — creates a task in the project. Returns 201. */
     @PostMapping
     public ResponseEntity<TaskResponse> createTask(
             @PathVariable Long projectId,
@@ -33,6 +38,7 @@ public class TaskController {
                 .body(taskService.createTask(projectId, request, authentication));
     }
 
+    /** GET /projects/{projectId}/tasks — lists tasks with optional ?status= and ?priority= filters. */
     @GetMapping
     public ResponseEntity<List<TaskResponse>> getTasksForProject(
             @PathVariable Long projectId,
@@ -42,6 +48,7 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getTasksForProject(projectId, status, priority, authentication));
     }
 
+    /** PUT /projects/{projectId}/tasks/{taskId} — updates a task. Null fields are left unchanged. */
     @PutMapping("/{taskId}")
     public ResponseEntity<TaskResponse> updateTask(
             @PathVariable Long projectId,
@@ -51,6 +58,7 @@ public class TaskController {
         return ResponseEntity.ok(taskService.updateTask(projectId, taskId, request, authentication));
     }
 
+    /** DELETE /projects/{projectId}/tasks/{taskId} — soft-deletes a task. Returns 204. */
     @DeleteMapping("/{taskId}")
     public ResponseEntity<Void> deleteTask(
             @PathVariable Long projectId,

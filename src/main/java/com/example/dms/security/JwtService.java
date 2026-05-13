@@ -12,6 +12,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Generates and validates JWT tokens using the HS256 algorithm.
+ * The signing key and token TTL are injected from application configuration.
+ */
 @Service
 public class JwtService {
 
@@ -25,6 +29,13 @@ public class JwtService {
         this.expiration = expiration;
     }
 
+    /**
+     * Creates a signed JWT with the given email as the subject and role as a custom claim.
+     *
+     * @param email the user's email address (used as the token subject)
+     * @param role  the user's role name (stored as an informational claim)
+     * @return a compact, signed JWT string
+     */
     public String generateToken(String email, String role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role);
@@ -37,10 +48,24 @@ public class JwtService {
                 .compact();
     }
 
+    /**
+     * Extracts the subject (email address) from a JWT.
+     *
+     * @param token the JWT string
+     * @return the email address stored as the token subject
+     * @throws io.jsonwebtoken.JwtException if the token is invalid or expired
+     */
     public String extractEmail(String token) {
         return extractAllClaims(token).getSubject();
     }
 
+    /**
+     * Returns {@code true} if the token's subject matches the given email and the token is not expired.
+     *
+     * @param token the JWT string to validate
+     * @param email the expected email address
+     * @return {@code true} if the token is valid for the given email
+     */
     public boolean isTokenValid(String token, String email) {
         return extractEmail(token).equals(email) && !isTokenExpired(token);
     }

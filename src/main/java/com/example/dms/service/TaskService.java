@@ -18,6 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * Manages tasks within projects. All operations require the caller to be
+ * a member or owner of the target project.
+ */
 @AllArgsConstructor
 @Service
 public class TaskService {
@@ -26,6 +30,17 @@ public class TaskService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
 
+    /**
+     * Creates a task in the specified project. The assignee is optional; if provided,
+     * the assignee user must exist.
+     *
+     * @param projectId      the project to create the task in
+     * @param request        task details (title, description, priority, deadline, optional assignee)
+     * @param authentication the current security context
+     * @return the created task as a {@link TaskResponse}
+     * @throws ResourceNotFoundException if the project or assignee user does not exist
+     * @throws AccessDeniedException     if the caller is not a member or owner of the project
+     */
     @Transactional
     public TaskResponse createTask(Long projectId, CreateTaskRequest request, Authentication authentication) {
         UserEntity creator = getAuthenticatedUser(authentication);
@@ -51,6 +66,18 @@ public class TaskService {
         return toResponse(taskRepository.save(task));
     }
 
+    /**
+     * Returns non-deleted tasks for a project with optional filtering by status and priority.
+     * Any combination of filters is supported — both, one, or neither.
+     *
+     * @param projectId      the project to query tasks for
+     * @param status         optional status filter (TODO, IN_PROGRESS, DONE)
+     * @param priority       optional priority filter (LOW, MEDIUM, HIGH)
+     * @param authentication the current security context
+     * @return filtered list of tasks as {@link TaskResponse} objects
+     * @throws ResourceNotFoundException if the project does not exist or is deleted
+     * @throws AccessDeniedException     if the caller is not a member or owner of the project
+     */
     @Transactional(readOnly = true)
     public List<TaskResponse> getTasksForProject(Long projectId, TaskStatus status,
                                                  TaskPriority priority, Authentication authentication) {
@@ -73,6 +100,18 @@ public class TaskService {
         return tasks.stream().map(this::toResponse).toList();
     }
 
+    /**
+     * Updates a task. Only fields that are non-null in the request are changed;
+     * null fields are left at their current values.
+     *
+     * @param projectId      the project the task belongs to
+     * @param taskId         the task to update
+     * @param request        the fields to update; null fields are skipped
+     * @param authentication the current security context
+     * @return the updated task as a {@link TaskResponse}
+     * @throws ResourceNotFoundException if the project or task does not exist
+     * @throws AccessDeniedException     if the caller is not a member or owner of the project
+     */
     @Transactional
     public TaskResponse updateTask(Long projectId, Long taskId,
                                    UpdateTaskRequest request, Authentication authentication) {
@@ -96,6 +135,15 @@ public class TaskService {
         return toResponse(taskRepository.save(task));
     }
 
+    /**
+     * Soft-deletes a task by setting its {@code deleted} flag to {@code true}.
+     *
+     * @param projectId      the project the task belongs to
+     * @param taskId         the task to delete
+     * @param authentication the current security context
+     * @throws ResourceNotFoundException if the project or task does not exist
+     * @throws AccessDeniedException     if the caller is not a member or owner of the project
+     */
     @Audited(action = "TASK_DELETE", entityType = "TASK",
             entityIdExpression = "#taskId.toString()",
             projectIdExpression = "#projectId")

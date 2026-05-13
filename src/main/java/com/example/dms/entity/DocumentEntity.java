@@ -7,6 +7,11 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * JPA entity storing document metadata. The actual file content is stored in MinIO
+ * and referenced by {@code minioKey} (a UUID). Documents are hard-deleted — there
+ * is no {@code deleted} flag.
+ */
 @Entity
 @Table(name = "documents")
 @Getter

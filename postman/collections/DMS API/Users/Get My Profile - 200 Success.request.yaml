@@ -1,8 +1,9 @@
 $kind: http-request
+name: Get My Profile - 200 Success
 url: http://localhost:8080/users/me
 method: GET
 auth:
   type: bearer
   credentials:
-    token: eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiVVNFUiIsInN1YiI6InRlc3RAdGVzdC5jb20iLCJpYXQiOjE3Nzg0OTkwNTIsImV4cCI6MTc3ODU4NTQ1Mn0.EpiJ5JuE0qBvVhl6X4hzApLYEOtVWpw5HzhefLX-6oTX265To7YbuNpf18elP2h6RNLZm_Ie9cnj2iJLYMc7MQ
+    token: "{{token}}"
 order: 1778499333053

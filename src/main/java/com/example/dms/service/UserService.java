@@ -1,7 +1,6 @@
 package com.example.dms.service;
 
 import com.example.dms.annotation.Audited;
-import lombok.extern.slf4j.Slf4j;
 import com.example.dms.dto.user.UpdateProfileRequest;
 import com.example.dms.dto.user.UserResponse;
 import com.example.dms.entity.Role;
@@ -9,26 +8,44 @@ import com.example.dms.entity.UserEntity;
 import com.example.dms.exception.InvalidOperationException;
 import com.example.dms.exception.ResourceNotFoundException;
 import com.example.dms.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Slf4j
+/**
+ * Manages user profiles and admin-level account operations such as role changes
+ * and account deactivation.
+ */
 @Service
+@RequiredArgsConstructor
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
+    /**
+     * Returns the profile of the currently authenticated user.
+     *
+     * @param authentication the current security context
+     * @return the caller's profile as a {@link UserResponse}
+     */
+    @Transactional(readOnly = true)
     public UserResponse getMe(Authentication authentication) {
         var user = getUserFromAuthentication(authentication);
         return toResponse(user);
     }
 
+    /**
+     * Updates the first and/or last name of the authenticated user.
+     * Fields that are {@code null} in the request are left unchanged.
+     *
+     * @param authentication the current security context
+     * @param request        the fields to update; null fields are skipped
+     * @return the updated profile as a {@link UserResponse}
+     */
     public UserResponse updateMe(Authentication authentication, UpdateProfileRequest request) {
         var user = getUserFromAuthentication(authentication);
         if (request.getFirstName() != null) user.setFirstName(request.getFirstName());
@@ -37,6 +54,12 @@ public class UserService {
         return toResponse(user);
     }
 
+    /**
+     * Returns all registered users. Intended for admin use only.
+     *
+     * @return list of all users as {@link UserResponse} objects
+     */
+    @Transactional(readOnly = true)
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll()
                 .stream()
@@ -44,6 +67,16 @@ public class UserService {
                 .toList();
     }
 
+    /**
+     * Changes the role of a user. Prevents demoting the last active admin to avoid
+     * locking all admin functionality out of the system.
+     *
+     * @param id   the ID of the user whose role should change
+     * @param role the new role to assign
+     * @return the updated user as a {@link UserResponse}
+     * @throws ResourceNotFoundException  if no user exists with the given ID
+     * @throws InvalidOperationException  if the change would leave zero active admins
+     */
     @Audited(action = "USER_ROLE_CHANGED", entityType = "USER",
             entityIdExpression = "#id.toString()",
             detailsExpression = "#role.name()")
@@ -56,10 +89,19 @@ public class UserService {
         }
         user.setRole(role);
         userRepository.save(user);
-        log.info("User role changed: userId={} newRole={}", id, role);
         return toResponse(user);
     }
 
+    /**
+     * Deactivates a user account, immediately invalidating all their active JWT tokens
+     * since the filter checks {@code isEnabled()} on every request. Prevents deactivating
+     * the last active admin.
+     *
+     * @param id the ID of the user to deactivate
+     * @return the updated user as a {@link UserResponse}
+     * @throws ResourceNotFoundException if no user exists with the given ID
+     * @throws InvalidOperationException if the user is the last active admin
+     */
     @Audited(action = "USER_DEACTIVATED", entityType = "USER",
             entityIdExpression = "#id.toString()")
     public UserResponse deactivateUser(Long id) {
@@ -71,7 +113,6 @@ public class UserService {
         }
         user.setActive(false);
         userRepository.save(user);
-        log.info("User deactivated: userId={} email={}", id, user.getEmail());
         return toResponse(user);
     }
 

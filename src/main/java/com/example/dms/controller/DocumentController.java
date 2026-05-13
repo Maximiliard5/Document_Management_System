@@ -14,6 +14,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+/**
+ * Endpoints for document upload, listing, download, and deletion within a project.
+ * All operations require the caller to be a member or owner of the specified project.
+ */
 @RestController
 @RequestMapping("/projects/{projectId}/documents")
 public class DocumentController {
@@ -24,6 +28,7 @@ public class DocumentController {
         this.documentService = documentService;
     }
 
+    /** POST /projects/{projectId}/documents — uploads a file (multipart/form-data, field: "file"). Returns 201. */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<DocumentResponse> uploadDocument(
             @PathVariable Long projectId,
@@ -33,6 +38,7 @@ public class DocumentController {
                 .body(documentService.uploadDocument(projectId, file, authentication));
     }
 
+    /** GET /projects/{projectId}/documents — lists all documents in a project. */
     @GetMapping
     public ResponseEntity<List<DocumentResponse>> listDocuments(
             @PathVariable Long projectId,
@@ -40,6 +46,7 @@ public class DocumentController {
         return ResponseEntity.ok(documentService.listDocuments(projectId, authentication));
     }
 
+    /** GET /projects/{projectId}/documents/{documentId}/download — streams the file as an attachment. */
     @GetMapping("/{documentId}/download")
     public ResponseEntity<InputStreamResource> downloadDocument(
             @PathVariable Long projectId,
@@ -53,6 +60,7 @@ public class DocumentController {
                 .body(new InputStreamResource(download.stream()));
     }
 
+    /** DELETE /projects/{projectId}/documents/{documentId} — hard-deletes the document and its file. Returns 204. */
     @DeleteMapping("/{documentId}")
     public ResponseEntity<Void> deleteDocument(
             @PathVariable Long projectId,

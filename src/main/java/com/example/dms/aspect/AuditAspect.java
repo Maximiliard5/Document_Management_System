@@ -17,6 +17,14 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.lang.reflect.Method;
 
+/**
+ * AOP aspect that intercepts all methods annotated with {@link com.example.dms.annotation.Audited}
+ * and persists an audit log entry via {@link com.example.dms.service.AuditService}.
+ * Both successful executions and failures are recorded using a try/finally block so
+ * that exceptions thrown by the target method are still audited before propagating.
+ * SpEL expressions in the annotation are evaluated after the method executes so that
+ * return values (e.g. generated IDs) are available via {@code #result}.
+ */
 @Slf4j
 @Aspect
 @Component
