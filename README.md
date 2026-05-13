@@ -39,28 +39,29 @@ cp .env .env.local   # or edit .env directly
 
 The `.env` file must define all variables listed in the table below. The application **will not start** without them.
 
-### 2. Start infrastructure
+### 2. Start everything
 
 ```bash
-docker compose up -d
+docker compose up --build
 ```
 
-This starts PostgreSQL (port 5432) and MinIO (port 9000, console on 9001). Flyway migrations run automatically on first startup.
+This builds the Spring Boot image and starts all three services — PostgreSQL (port 5432), MinIO (port 9000, console on 9001), and the app (port 8080). The app waits for PostgreSQL to pass its healthcheck before starting. Flyway migrations run automatically on first boot.
 
-### 3. Run the application
+The API is available at `http://localhost:8080`.
+
+### Running without Docker (local development)
+
+Start only the infrastructure:
+
+```bash
+docker compose up -d postgres minio
+```
+
+Then run the app with Maven:
 
 ```bash
 ./mvnw spring-boot:run
 ```
-
-Or build a fat jar and run it:
-
-```bash
-./mvnw clean package -DskipTests
-java -jar target/dms-0.0.1-SNAPSHOT.jar
-```
-
-The API is available at `http://localhost:8080`.
 
 ---
 
