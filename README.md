@@ -34,7 +34,7 @@ A REST API backend for managing projects, tasks, and documents, with JWT-based a
 Copy the example and fill in your values:
 
 ```bash
-cp .env .env.local   # or edit .env directly
+cp .env.example .env
 ```
 
 The `.env` file must define all variables listed in the table below. The application **will not start** without them.
@@ -211,12 +211,4 @@ POST /auth/login → copy the token value → set as {{token}}
 
 ```bash
 ./mvnw test
-```
-
-```bash
-# Run a single test class
-./mvnw test -Dtest=UserServiceTest
-
-# Run a single test method
-./mvnw test -Dtest=UserServiceTest#shouldReturnUserById
 ```
