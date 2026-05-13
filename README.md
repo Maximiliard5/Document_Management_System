@@ -31,12 +31,6 @@ A REST API backend for managing projects, tasks, and documents, with JWT-based a
 
 ### 1. Clone and configure environment variables
 
-Copy the example and fill in your values:
-
-```bash
-cp .env.example .env
-```
-
 The `.env` file must define all variables listed in the table below. The application **will not start** without them.
 
 ### 2. Start everything
