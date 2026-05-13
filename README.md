@@ -204,11 +204,3 @@ Set the `token` collection variable after logging in:
 ```
 POST /auth/login → copy the token value → set as {{token}}
 ```
-
----
-
-## Running Tests
-
-```bash
-./mvnw test
-```
