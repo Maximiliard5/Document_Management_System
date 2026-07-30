@@ -1,0 +1,56 @@
+.results {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.result {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+}
+
+.result:hover {
+  background-color: var(--color-canvas);
+}
+
+.resultInfo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.resultName {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.resultEmail {
+  font-size: 0.8125rem;
+  color: var(--color-ink-muted);
+}
+
+.addButton {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.empty {
+  margin: 1rem 0 0;
+  font-size: 0.875rem;
+  color: var(--color-ink-muted);
+}
+
+.error {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--priority-high);
+}

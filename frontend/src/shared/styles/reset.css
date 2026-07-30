@@ -1,0 +1,52 @@
+/*
+ * Minimal modern CSS reset. Deliberately does not strip list bullets or link
+ * underlines globally - those are removed on a per-component basis (e.g. nav
+ * lists) so we don't lose them somewhere they're actually meaningful, like
+ * inside a document description.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+#root {
+  isolation: isolate;
+}

@@ -1,0 +1,38 @@
+/*
+ * Design tokens for the DMS frontend. See the "Design Direction" section of the
+ * implementation plan for the reasoning behind these specific values - in short:
+ * calm neutral surfaces, one real accent color, and status/priority colors that
+ * carry actual meaning rather than decoration.
+ */
+:root {
+  /* Surfaces */
+  --color-canvas: #f5f6f8;
+  --color-surface: #ffffff;
+  --color-border: #e2e4e9;
+
+  /* Text */
+  --color-ink: #14171c;
+  --color-ink-muted: #5b6270;
+
+  /* Brand accent */
+  --color-primary: #0f6b5c;
+  --color-primary-hover: #0c5a4d;
+
+  /* Task priority (TaskPriority enum) */
+  --priority-high: #c1443b;
+  --priority-medium: #b8860b;
+  --priority-low: #4c7a5e;
+
+  /* Task status (TaskStatus enum) */
+  --status-todo: #8a8f98;
+  --status-in-progress: #2563a8;
+  --status-done: #2f8558;
+
+  /* Type */
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Layout */
+  --radius: 8px;
+  --radius-sm: 6px;
+}

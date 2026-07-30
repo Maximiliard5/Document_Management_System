@@ -1,0 +1,8 @@
+.wrapper {
+  cursor: grab;
+  touch-action: none;
+}
+
+.wrapper:active {
+  cursor: grabbing;
+}

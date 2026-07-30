@@ -1,0 +1,24 @@
+.shell {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  grid-template-rows: 56px 1fr;
+  grid-template-areas:
+    'sidebar topbar'
+    'sidebar content';
+  min-height: 100vh;
+}
+
+.shell > nav {
+  grid-area: sidebar;
+}
+
+.shell > header {
+  grid-area: topbar;
+}
+
+.content {
+  grid-area: content;
+  padding: 1.5rem;
+  min-width: 0;
+  overflow: auto;
+}

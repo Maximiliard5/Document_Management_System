@@ -1,0 +1,55 @@
+/* Self-hosted font weights actually used by the app - see tokens.css for the
+ * --font-sans/--font-mono stack these back. Importing specific weight files
+ * (rather than the package's index.css, which pulls every weight) keeps the
+ * bundle from carrying font files we never use. */
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+@import '@fontsource/ibm-plex-sans/700.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
+@import './reset.css';
+@import './tokens.css';
+
+html {
+  color-scheme: light;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: var(--color-ink);
+  background-color: var(--color-canvas);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 1.75rem;
+}
+
+h2 {
+  font-size: 1.375rem;
+}
+
+h3 {
+  font-size: 1.125rem;
+}
+
+h4 {
+  font-size: 1rem;
+}
+
+code,
+kbd,
+samp {
+  font-family: var(--font-mono);
+}

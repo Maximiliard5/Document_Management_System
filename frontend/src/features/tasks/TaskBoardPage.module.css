@@ -1,0 +1,9 @@
+.board {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.error {
+  color: var(--priority-high);
+}

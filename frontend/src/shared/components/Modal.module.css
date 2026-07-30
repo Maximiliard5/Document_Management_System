@@ -1,0 +1,33 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgb(20 23 28 / 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 100;
+}
+
+.panel {
+  background-color: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  max-width: 480px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgb(20 23 28 / 0.15);
+}
+
+.panel:focus-visible {
+  outline: none;
+}
+
+.panelLarge {
+  max-width: 800px;
+}
+
+.title {
+  margin: 0 0 1rem;
+}

@@ -1,0 +1,117 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: 1rem 0.75rem;
+  background-color: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1.125rem;
+  padding: 0.5rem 0.5rem 1rem;
+  color: var(--color-primary);
+}
+
+.link,
+.activeLink {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  color: var(--color-ink-muted);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.link:hover {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+.activeLink {
+  background-color: var(--color-canvas);
+  color: var(--color-primary);
+}
+
+.projectsRow {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.projectsRow > .link,
+.projectsRow > .activeLink {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Same ghost-button treatment as .link/.link:hover above, sized for a
+   small icon-only control next to it. */
+.expandToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0.375rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+}
+
+.expandToggle:hover {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+.expandToggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.expandToggle svg {
+  transition: transform 0.15s ease;
+}
+
+.expandToggle.collapsed svg {
+  transform: rotate(180deg);
+}
+
+.recentList {
+  list-style: none;
+  margin: 0 0 0.375rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.0625rem;
+}
+
+.recentLink,
+.activeRecentLink {
+  display: block;
+  padding: 0.375rem 0.75rem 0.375rem 2.125rem;
+  border-radius: var(--radius-sm);
+  color: var(--color-ink-muted);
+  text-decoration: none;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recentLink:hover {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+.activeRecentLink {
+  background-color: var(--color-canvas);
+  color: var(--color-primary);
+}

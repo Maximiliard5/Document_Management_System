@@ -32,7 +32,7 @@ services:
       - minio_data:/data
 
   app:
-    build: .
+    build: ./backend
     container_name: dms-app
     ports:
       - "8080:8080"

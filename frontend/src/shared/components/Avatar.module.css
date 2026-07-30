@@ -1,0 +1,12 @@
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  color: white;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  line-height: 1;
+}
